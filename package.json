@@ -2,11 +2,6 @@
   "name": "power-tab-search",
   "version": "1.0.0",
   "description": "A power tab search for chrome, much better than the native search",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/N0I0C0K/power-tab-search"
-  },
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
