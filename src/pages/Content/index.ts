@@ -22,4 +22,29 @@ function get_all_text() {
   console.log(key_dict)
 }
 
+var all_text = ''
+
+async function get_all_text_recursion(node: Node) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    all_text += node.textContent
+  } else {
+    for (let child of node.childNodes) {
+      await get_all_text_recursion(child)
+    }
+  }
+}
+
 get_all_text()
+
+get_all_text_recursion(
+  document.getElementsByClassName(
+    'ace-editor selenium-ace-editor syntax notranslate zoneId-0 doesWrap'
+  )[0]
+).then(() => {
+  console.log(all_text)
+  const segmenter = new Intl.Segmenter('zh', { granularity: 'word' })
+  const segs = segmenter.segment(all_text)
+  for (let x of segs) {
+    console.log(x)
+  }
+})
