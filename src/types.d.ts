@@ -20,11 +20,14 @@ export type SentenceDict = {
   [nodeId: string]: string
 }
 
-export type Action = 'submitWordDict' | 'searchFromWords'
+export type Action = {
+  submitWordDict: [TransformDict, void]
+  searchFromWords: [string[], SearchResult[]]
+}
 
-export type Message<T> = {
-  actionName: Action
-  data: T
+export type Message<T extends keyof Action> = {
+  actionName: T
+  data: Action[T][0]
 }
 
 export type TransformDict = {

@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid'
-import { SentenceDict, TransformDict, WordDict } from '../../types'
+import { SentenceDict, TransformDict, WordDict } from '@/types'
+import { sendMessage } from '@/helper/message'
 
 type TextElement = {
   text: string
@@ -60,9 +61,9 @@ async function generateDictFromTexts(): Promise<TransformDict> {
   }
 }
 
-refreshTextElemnts().then(async () => {
-  const transformData = await generateDictFromTexts()
-  console.log(transformData)
-  console.log(id_node_dict)
-  await chrome.runtime.sendMessage(transformData)
-})
+setTimeout(() => {
+  refreshTextElemnts().then(async () => {
+    const transformData = await generateDictFromTexts()
+    await sendMessage('submitWordDict', transformData)
+  })
+}, 1000)

@@ -1,10 +1,5 @@
-import type {
-  Action,
-  Message,
-  SearchResult,
-  TransformDict,
-  WordDictVal,
-} from '../../types'
+import { MessageHandler } from '@/helper/message'
+import type { SearchResult, TransformDict, WordDictVal } from '@/types'
 
 const tabDicts: {
   [tabId: number]: {
@@ -12,22 +7,6 @@ const tabDicts: {
     data: TransformDict
   }
 } = {}
-
-const messageHandleList:{
-  [action:Action]: 
-} = {}
-
-chrome.runtime.onMessage.addListener(
-  (msg: Message<any>, sender, senderResp) => {
-    console.log(msg)
-    const senderTab = sender.tab
-    console.log(senderTab)
-    tabDicts[senderTab?.id ?? 0] = {
-      tab: senderTab!,
-      data: msg,
-    }
-  }
-)
 
 function intersectionList(list: WordDictVal[][]): {
   id: string
@@ -54,7 +33,7 @@ function intersectionList(list: WordDictVal[][]): {
     .slice(0, 4)
 }
 
-async function searchFromWords(words: string[]): Promise<SearchResult[]> {
+function searchFromWords(words: string[]): SearchResult[] {
   const resList: SearchResult[] = []
   for (let tabId in tabDicts) {
     const {
@@ -82,3 +61,17 @@ async function searchFromWords(words: string[]): Promise<SearchResult[]> {
   }
   return resList
 }
+
+const messageHandler = new MessageHandler()
+messageHandler.addHandler('submitWordDict', (data, sender, sendResp) => {
+  const senderTab = sender.tab
+  tabDicts[senderTab?.id ?? 0] = {
+    tab: senderTab!,
+    data,
+  }
+})
+
+messageHandler.addHandler('searchFromWords', (data, sender, sendResp) => {
+  const res = searchFromWords(data)
+  sendResp(res)
+})
