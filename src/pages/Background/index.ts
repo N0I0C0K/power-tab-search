@@ -8,6 +8,10 @@ const tabDicts: {
   }
 } = {}
 
+chrome.storage.session.get('tabDicts').then((res) => {
+  Object.assign(tabDicts, res['tabDicts'])
+})
+
 function intersectionList(list: WordDictVal[][]): {
   id: string
   score: number
@@ -69,7 +73,9 @@ messageHandler.addHandler('submitWordDict', (data, sender, sendResp) => {
     tab: senderTab!,
     data,
   }
-  console.log(data)
+  chrome.storage.session.set({
+    tabDicts,
+  })
 })
 
 messageHandler.addHandler('searchFromWords', (data, sender, sendResp) => {
