@@ -11,8 +11,8 @@ export async function sendMessage<T extends keyof Action>(
   data: Action[T][0],
   responseCallback?: (data: Action[T][1]) => void
 ) {
-  const res = await chrome.runtime.sendMessage({
-    action: action,
+  const res = await chrome.runtime.sendMessage<Message<any>>({
+    actionName: action,
     data: data,
   })
   responseCallback?.(res)
@@ -21,17 +21,17 @@ export async function sendMessage<T extends keyof Action>(
 export class MessageHandler {
   private messageHandleDict: {
     [action: string]: MessageHandleFunc<any>
-  }
+  } = {}
   constructor() {
     this.messageHandleDict = {}
     chrome.runtime.onMessage.addListener(this.onMessage)
   }
 
-  private onMessage(
+  private onMessage = (
     message: Message<any>,
     sender: chrome.runtime.MessageSender,
     sendResponse: (msg: any) => void
-  ) {
+  ) => {
     if (
       'actionName' in message &&
       message.actionName in this.messageHandleDict
@@ -48,10 +48,10 @@ export class MessageHandler {
     }
   }
 
-  public addHandler<T extends keyof Action>(
+  public addHandler = <T extends keyof Action>(
     action: T,
     func: MessageHandleFunc<T>
-  ) {
+  ) => {
     this.messageHandleDict[action] = func
   }
 }

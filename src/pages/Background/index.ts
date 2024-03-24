@@ -29,8 +29,8 @@ function intersectionList(list: WordDictVal[][]): {
       score: val,
     }
   })
-    .sort((lt, rt) => lt.score - rt.score)
-    .slice(0, 4)
+    .sort((lt, rt) => rt.score - lt.score)
+    .slice(0, 5)
 }
 
 function searchFromWords(words: string[]): SearchResult[] {
@@ -69,6 +69,7 @@ messageHandler.addHandler('submitWordDict', (data, sender, sendResp) => {
     tab: senderTab!,
     data,
   }
+  console.log(data)
 })
 
 messageHandler.addHandler('searchFromWords', (data, sender, sendResp) => {
