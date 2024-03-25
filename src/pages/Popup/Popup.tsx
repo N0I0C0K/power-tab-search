@@ -42,11 +42,28 @@ const Popup = () => {
       <div>
         {result?.map((v) => {
           return (
-            <div key={v.nodeId}>
-              <div>{v.title}</div>
-              <div>{v.subTitle}</div>
-              <div>{v.score}</div>
+            <div
+              key={v.nodeId}
+              style={{
+                display: 'flex',
+              }}
+            >
               <img src={v.icon} alt="icon" />
+              <div>
+                <div>{v.title}</div>
+                <div>{v.subTitle}</div>
+              </div>
+              <div>{v.score}</div>
+              <button
+                onClick={() => {
+                  chrome.tabs.update(v.tabId, {
+                    active: true,
+                  })
+                  console.log('success')
+                }}
+              >
+                go
+              </button>
             </div>
           )
         })}

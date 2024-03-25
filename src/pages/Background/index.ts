@@ -12,6 +12,12 @@ chrome.storage.session.get('tabDicts').then((res) => {
   Object.assign(tabDicts, res['tabDicts'])
 })
 
+function saveTabDicts() {
+  chrome.storage.session.set({
+    tabDicts,
+  })
+}
+
 function intersectionList(list: WordDictVal[][]): {
   id: string
   score: number
@@ -73,12 +79,17 @@ messageHandler.addHandler('submitWordDict', (data, sender, sendResp) => {
     tab: senderTab!,
     data,
   }
-  chrome.storage.session.set({
-    tabDicts,
-  })
+  saveTabDicts()
 })
 
 messageHandler.addHandler('searchFromWords', (data, sender, sendResp) => {
   const res = searchFromWords(data)
   sendResp(res)
+})
+
+chrome.tabs.onRemoved.addListener((tabId, info) => {
+  if (tabId in tabDicts) {
+    delete tabDicts[tabId]
+  }
+  saveTabDicts()
 })

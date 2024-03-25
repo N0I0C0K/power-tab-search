@@ -20,9 +20,15 @@ export type SentenceDict = {
   [nodeId: string]: string
 }
 
+export type JumpToTabParams = {
+  tabId: number
+  nodeId?: string
+}
+
 export type Action = {
   submitWordDict: [TransformDict, void]
   searchFromWords: [string[], SearchResult[]]
+  jumpToTab: [JumpToTabParams, void]
 }
 
 export type Message<T extends keyof Action> = {
