@@ -1,5 +1,7 @@
 import { sendMessage, sendMessageToTab } from '@/helper/message'
 import { SearchResult } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import React, { useMemo, useState } from 'react'
 import './Popup.css'
 
@@ -14,19 +16,14 @@ const Popup = () => {
   }, [segment])
   return (
     <div className="App">
-      <div
-        style={{
-          display: 'flex',
-          gap: '1rem',
-        }}
-      >
-        <input
+      <div className="flex gap-4">
+        <Input
           value={text}
           onChange={(ev) => {
             setText(ev.target.value)
           }}
         />
-        <button
+        <Button
           onClick={() => {
             const words = splitText(text)
             console.log(words)
@@ -36,8 +33,8 @@ const Popup = () => {
             })
           }}
         >
-          search
-        </button>
+          Search
+        </Button>
       </div>
       <div>
         {result?.map((v) => {
