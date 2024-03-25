@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { SentenceDict, TransformDict, WordDict } from '@/types'
-import { sendMessage } from '@/helper/message'
+import { MessageHandler, sendMessage } from '@/helper/message'
 
 type TextElement = {
   text: string
@@ -67,3 +67,10 @@ setTimeout(() => {
     await sendMessage('submitWordDict', transformData)
   })
 }, 1000)
+
+const messageHandler = new MessageHandler()
+messageHandler.addHandler('jumpToTab', (data, sender, sendResp) => {
+  sendResp({
+    success: true,
+  })
+})

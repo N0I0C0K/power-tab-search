@@ -18,6 +18,19 @@ export async function sendMessage<T extends keyof Action>(
   responseCallback?.(res)
 }
 
+export async function sendMessageToTab<T extends keyof Action>(
+  tabId: number,
+  action: T,
+  data: Action[T][0],
+  responseCallback?: (data: Action[T][1]) => void
+) {
+  const res = await chrome.tabs.sendMessage<Message<any>>(tabId, {
+    actionName: action,
+    data: data,
+  })
+  responseCallback?.(res)
+}
+
 export class MessageHandler {
   private messageHandleDict: {
     [action: string]: MessageHandleFunc<any>

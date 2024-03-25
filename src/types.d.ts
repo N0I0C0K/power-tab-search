@@ -7,6 +7,11 @@ export type WordDict = {
   [word: string]: WordDictVal[]
 }
 
+export type SuccessResponse = {
+  success: boolean
+  msg?: string
+}
+
 export type SearchResult = {
   tabId: number
   icon: string
@@ -28,7 +33,7 @@ export type JumpToTabParams = {
 export type Action = {
   submitWordDict: [TransformDict, void]
   searchFromWords: [string[], SearchResult[]]
-  jumpToTab: [JumpToTabParams, void]
+  jumpToTab: [JumpToTabParams, SuccessResponse]
 }
 
 export type Message<T extends keyof Action> = {

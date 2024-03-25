@@ -1,4 +1,4 @@
-import { sendMessage } from '@/helper/message'
+import { sendMessage, sendMessageToTab } from '@/helper/message'
 import { SearchResult } from '@/types'
 import React, { useMemo, useState } from 'react'
 import './Popup.css'
@@ -56,10 +56,16 @@ const Popup = () => {
               <div>{v.score}</div>
               <button
                 onClick={() => {
-                  chrome.tabs.update(v.tabId, {
-                    active: true,
-                  })
-                  console.log('success')
+                  chrome.tabs
+                    .update(v.tabId, {
+                      active: true,
+                    })
+                    .then((val) => {
+                      sendMessageToTab(val.id!, 'jumpToTab', {
+                        tabId: val.id!,
+                        nodeId: v.nodeId,
+                      })
+                    })
                 }}
               >
                 go
