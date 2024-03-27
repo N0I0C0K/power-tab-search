@@ -45,6 +45,8 @@ export class MessageHandler {
     sender: chrome.runtime.MessageSender,
     sendResponse: (msg: any) => void,
   ) => {
+    console.log(message)
+    console.log(sender)
     if ('actionName' in message && message.actionName in this.messageHandleDict) {
       this.messageHandleDict[message.actionName](message.data, sender, data => {
         sendResponse(data)

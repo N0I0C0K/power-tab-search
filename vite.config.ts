@@ -1,15 +1,16 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path, { resolve } from 'path';
-import { getCacheInvalidationKey, getPlugins } from './utils/vite';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path, { resolve } from 'path'
+import { getCacheInvalidationKey, getPlugins } from './utils/vite'
 
-const rootDir = resolve(__dirname);
-const srcDir = resolve(rootDir, 'src');
-const pagesDir = resolve(srcDir, 'pages');
+const rootDir = resolve(__dirname)
+const srcDir = resolve(rootDir, 'src')
+const pagesDir = resolve(srcDir, 'pages')
+const sharedDir = resolve(srcDir, 'shared')
 
-const isDev = process.env.__DEV__ === 'true';
-const isProduction = !isDev;
+const isDev = process.env.__DEV__ === 'true'
+const isProduction = !isDev
 
 export default defineConfig({
   resolve: {
@@ -18,6 +19,7 @@ export default defineConfig({
       '@src': srcDir,
       '@assets': resolve(srcDir, 'assets'),
       '@pages': pagesDir,
+      '@shared': sharedDir,
     },
   },
   plugins: [...getPlugins(isDev), react()],
@@ -47,9 +49,9 @@ export default defineConfig({
         entryFileNames: 'src/pages/[name]/index.js',
         chunkFileNames: isDev ? 'assets/js/[name].js' : 'assets/js/[name].[hash].js',
         assetFileNames: assetInfo => {
-          const { name } = path.parse(assetInfo.name);
-          const assetFileName = name === 'contentStyle' ? `${name}${getCacheInvalidationKey()}` : name;
-          return `assets/[ext]/${assetFileName}.chunk.[ext]`;
+          const { name } = path.parse(assetInfo.name)
+          const assetFileName = name === 'contentStyle' ? `${name}${getCacheInvalidationKey()}` : name
+          return `assets/[ext]/${assetFileName}.chunk.[ext]`
         },
       },
     },
@@ -60,4 +62,4 @@ export default defineConfig({
     include: ['**/*.test.ts', '**/*.test.tsx'],
     setupFiles: './test-utils/vitest.setup.js',
   },
-});
+})

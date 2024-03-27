@@ -6,22 +6,26 @@ refreshOnUpdate('pages/content/injected/parseContent')
 
 type TextElement = {
   text: string
-  node: Element
+  node: Node
 }
 
 let textElements: TextElement[] = []
 let idNodeDict: {
-  [key: string]: Element
+  [key: string]: Node
 } = {}
 
-async function getAllTextRecursion(node: Element) {
+async function getAllTextRecursion(node: Node | undefined) {
+  if (node === undefined) {
+    return
+  }
   if (node.nodeType === Node.TEXT_NODE) {
+    console.log('deep')
     textElements.push({
       text: node.textContent ?? '',
       node: node,
     })
   } else {
-    for (const child of node.children) {
+    for (const child of node.childNodes) {
       await getAllTextRecursion(child)
     }
   }
@@ -29,9 +33,7 @@ async function getAllTextRecursion(node: Element) {
 
 async function refreshTextElemnts() {
   textElements = []
-  await getAllTextRecursion(
-    document.getElementsByClassName('ace-editor selenium-ace-editor syntax notranslate zoneId-0 doesWrap')[0],
-  )
+  await getAllTextRecursion(document.getElementById('editor-1'))
 }
 
 async function generateDictFromTexts(): Promise<TransformDict> {
@@ -72,7 +74,7 @@ const messageHandler = new MessageHandler()
 messageHandler.addHandler('jumpToTab', (data, sender, sendResp) => {
   if (data.nodeId !== undefined && data.nodeId in idNodeDict) {
     const node = idNodeDict[data.nodeId]
-    node.scrollIntoView()
+    node.parentElement.scrollIntoView()
     sendResp({
       success: true,
     })
