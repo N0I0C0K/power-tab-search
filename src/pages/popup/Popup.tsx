@@ -4,47 +4,42 @@ import React, { useState, useMemo } from 'react'
 
 import withSuspense from '@src/shared/hoc/withSuspense'
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary'
-import { SearchResult } from '@src/types'
+import { SearchResultItem } from '@src/types'
 import { Button } from '@src/components/ui/button'
 import { Input } from '@src/components/ui/input'
 import { Skeleton } from '@src/components/ui/skeleton'
 import { sendMessage, sendMessageToTab } from '@shared/helper/message'
+import { useEffect } from 'react'
+import { Image } from '@src/components/ui/image'
 
-const ResultItem: React.FC<SearchResult> = res => {
-  const [loaded, setLoaded] = useState<'loading' | 'success' | 'failed'>('loading')
+async function jumpToTab(result: SearchResultItem) {
+  await chrome.windows.update(result.windowId, {
+    focused: true,
+  })
+  await chrome.tabs
+    .update(result.tabId, {
+      active: true,
+    })
+    .then(val => {
+      sendMessageToTab(val.id!, 'jumpToTab', {
+        tabId: val.id!,
+        nodeId: result.nodeId,
+      })
+    })
+}
+
+const ResultItem: React.FC<SearchResultItem> = res => {
   return (
-    <div className="flex gap-2 p-2 shadow-sm border rounded-md duration-200 hover:shadow-lg hover:translate-x-1">
-      {loaded === 'loading' || loaded === 'success' ? (
-        <img
-          className="self-center"
-          src={res.icon}
-          alt="img"
-          onLoad={() => {
-            setLoaded('success')
-          }}
-          onError={() => {
-            setLoaded('failed')
-          }}
-        />
-      ) : null}
-      {loaded === 'loading' ? <Skeleton className="h-10 w-10" /> : null}
+    <div className="flex gap-2 p-2 shadow-sm border rounded-md duration-200 hover:shadow-lg hover:translate-x-1 cursor-pointer">
+      <Image src={res.icon} />
       <div className="flex-1">
         <h3>{res.title}</h3>
         <p>{res.subTitle}</p>
       </div>
       <Button
-        variant={'outline'}
+        variant={'ghost'}
         onClick={() => {
-          chrome.tabs
-            .update(res.tabId, {
-              active: true,
-            })
-            .then(val => {
-              sendMessageToTab(val.id!, 'jumpToTab', {
-                tabId: val.id!,
-                nodeId: res.nodeId,
-              })
-            })
+          jumpToTab(res)
         }}>
         Jump
       </Button>
@@ -54,9 +49,10 @@ const ResultItem: React.FC<SearchResult> = res => {
 
 const Popup = () => {
   const [text, setText] = useState('')
-  const [result, setResult] = useState<SearchResult[]>([
+  const [result, setResult] = useState<SearchResultItem[]>([
     {
       nodeId: '1',
+      windowId: 11,
       score: 1,
       subTitle: 'test....',
       tabId: 11111,

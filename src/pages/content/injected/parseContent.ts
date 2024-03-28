@@ -57,6 +57,7 @@ async function generateDictFromTexts(): Promise<TransformDict> {
       wordDict[seg.segment].push(insertObj)
     }
   }
+
   return {
     wordDict,
     sentenceDict: id2Sentence,
@@ -71,7 +72,7 @@ setTimeout(() => {
 }, 1000)
 
 const messageHandler = new MessageHandler()
-messageHandler.addHandler('jumpToTab', (data, sender, sendResp) => {
+messageHandler.addHandler('jumpToTab', async (data, sender, sendResp) => {
   if (data.nodeId !== undefined && data.nodeId in idNodeDict) {
     const node = idNodeDict[data.nodeId]
     node.parentElement.scrollIntoView()

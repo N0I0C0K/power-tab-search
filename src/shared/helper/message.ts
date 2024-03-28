@@ -4,7 +4,7 @@ export type MessageHandleFunc<T extends keyof Action> = (
   data: Action[T][0],
   sender: chrome.runtime.MessageSender,
   sendResponse: (data: Action[T][1]) => void,
-) => void
+) => Promise<void>
 
 export async function sendMessage<T extends keyof Action>(
   action: T,
@@ -40,7 +40,7 @@ export class MessageHandler {
     chrome.runtime.onMessage.addListener(this.onMessage)
   }
 
-  private onMessage = (
+  private onMessage = async (
     message: Message<any>,
     sender: chrome.runtime.MessageSender,
     sendResponse: (msg: any) => void,
@@ -52,7 +52,7 @@ export class MessageHandler {
         sendResponse(data)
       })
     } else {
-      console.log('unknow message: ', message)
+      console.log('unknow message')
     }
   }
 

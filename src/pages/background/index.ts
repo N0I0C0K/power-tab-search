@@ -1,9 +1,9 @@
-import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
-import 'webextension-polyfill';
+import reloadOnUpdate from 'virtual:reload-on-update-in-background-script'
+import 'webextension-polyfill'
 import { MessageHandler } from '@src/shared/helper/message'
-import type { SearchResult, TransformDict, WordDictVal } from '@src/types'
+import type { SearchResultItem, TransformDict, WordDictVal } from '@src/types'
 
-reloadOnUpdate('pages/background');
+reloadOnUpdate('pages/background')
 
 /**
  * Extension reloading is necessary because the browser automatically caches the css.
@@ -11,15 +11,15 @@ reloadOnUpdate('pages/background');
  */
 //reloadOnUpdate('pages/content/style.scss');
 
-
 const tabDicts: {
   [tabId: number]: {
+    windowId: number
     tab: chrome.tabs.Tab
     data: TransformDict
   }
 } = {}
 
-chrome.storage.session.get('tabDicts').then((res) => {
+chrome.storage.session.get('tabDicts').then(res => {
   Object.assign(tabDicts, res['tabDicts'])
 })
 
@@ -54,21 +54,21 @@ function intersectionList(list: WordDictVal[][]): {
     .slice(0, 5)
 }
 
-function searchFromWords(words: string[]): SearchResult[] {
-  const resList: SearchResult[] = []
+function searchFromWords(words: string[]): SearchResultItem[] {
+  const resList: SearchResultItem[] = []
   for (const tabId in tabDicts) {
     const {
       tab: tabInfo,
       data: { sentenceDict, wordDict },
     } = tabDicts[tabId]
-    const hasList: WordDictVal[][] = Array.from(words, (v) => {
+    const hasList: WordDictVal[][] = Array.from(words, v => {
       if (v in wordDict) {
         return wordDict[v]
       }
       return []
-    }).filter((l) => l.length > 0)
+    }).filter(l => l.length > 0)
     resList.push(
-      ...intersectionList(hasList).map<SearchResult>((val) => {
+      ...intersectionList(hasList).map<SearchResultItem>(val => {
         return {
           title: tabInfo.title!,
           icon: tabInfo.favIconUrl!,
@@ -76,24 +76,26 @@ function searchFromWords(words: string[]): SearchResult[] {
           score: val.score,
           tabId: tabInfo.id!,
           subTitle: sentenceDict[val.id],
+          windowId: tabInfo.windowId,
         }
-      })
+      }),
     )
   }
   return resList
 }
 
 const messageHandler = new MessageHandler()
-messageHandler.addHandler('submitWordDict', (data, sender, sendResp) => {
+messageHandler.addHandler('submitWordDict', async (data, sender, sendResp) => {
   const senderTab = sender.tab
   tabDicts[senderTab?.id ?? 0] = {
     tab: senderTab!,
     data,
+    windowId: senderTab.windowId,
   }
   saveTabDicts()
 })
 
-messageHandler.addHandler('searchFromWords', (data, sender, sendResp) => {
+messageHandler.addHandler('searchFromWords', async (data, sender, sendResp) => {
   const res = searchFromWords(data)
   sendResp(res)
 })
@@ -105,7 +107,4 @@ chrome.tabs.onRemoved.addListener((tabId, info) => {
   saveTabDicts()
 })
 
-
-
-
-console.log('background loaded');
+console.log('background loaded')
