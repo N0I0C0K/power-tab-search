@@ -62,7 +62,7 @@ const Popup = () => {
   const [segment] = useState(new Intl.Segmenter('zh', { granularity: 'word' }))
   const splitText = useMemo(() => {
     return (text: string): string[] => {
-      return Array.from(segment.segment(text), v => v.segment)
+      return Array.from(segment.segment(text.toLocaleLowerCase()), v => v.segment.trim()).filter(x => x.length > 0)
     }
   }, [segment])
   return (
@@ -70,6 +70,7 @@ const Popup = () => {
       <div className="flex gap-4">
         <Input
           value={text}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={true}
           placeholder="text to search"
           onChange={ev => {

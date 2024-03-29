@@ -14,26 +14,32 @@ let idNodeDict: {
   [key: string]: Node
 } = {}
 
-async function getAllTextRecursion(node: Node | undefined) {
+function isInViewport(element: Element) {
+  const rect = element.getBoundingClientRect()
+  return rect.top >= 10 && rect.left >= 10
+}
+
+function getAllTextRecursion(node: Node | undefined) {
   if (node === undefined) {
     return
   }
-  if (node.nodeType === Node.TEXT_NODE) {
-    console.log('deep')
-    textElements.push({
-      text: node.textContent ?? '',
-      node: node,
-    })
-  } else {
-    for (const child of node.childNodes) {
-      await getAllTextRecursion(child)
+  if (node.nodeType === Node.TEXT_NODE && isInViewport(node.parentElement)) {
+    const text = node.textContent.trim().toLocaleLowerCase()
+    if (text.length > 0) {
+      textElements.push({
+        text: text ?? '',
+        node: node,
+      })
     }
+  }
+  for (const child of node.childNodes) {
+    getAllTextRecursion(child)
   }
 }
 
 async function refreshTextElemnts() {
   textElements = []
-  await getAllTextRecursion(document.getElementById('editor-1'))
+  await getAllTextRecursion(document.getElementsByTagName('body')[0])
 }
 
 async function generateDictFromTexts(): Promise<TransformDict> {
@@ -41,22 +47,34 @@ async function generateDictFromTexts(): Promise<TransformDict> {
   const segmenter = new Intl.Segmenter('zh', { granularity: 'word' })
   const wordDict: WordDict = {}
   const id2Sentence: SentenceDict = {}
-  for (const { node, text } of textElements) {
+  const ln = textElements.length
+  textElements.forEach(({ node, text }, idx) => {
     const textId = nanoid()
     const insertObj = {
       id: textId,
       sentence: text,
     }
     idNodeDict[textId] = node
-    id2Sentence[textId] = text
+    if (text.length < 10) {
+      console.log(text)
+      id2Sentence[textId] =
+        (idx > 0 ? textElements[idx - 1].text : '') + text + (idx < ln - 1 ? textElements[idx + 1].text : '')
+      console.log(id2Sentence[textId])
+    } else {
+      id2Sentence[textId] = text
+    }
 
     for (const seg of segmenter.segment(text)) {
-      if (!(seg.segment in wordDict)) {
-        wordDict[seg.segment] = []
+      const segText = seg.segment.trim()
+      if (segText.length === 0) {
+        continue
       }
-      wordDict[seg.segment].push(insertObj)
+      if (!(segText in wordDict)) {
+        wordDict[segText] = []
+      }
+      wordDict[segText].push(insertObj)
     }
-  }
+  })
 
   return {
     wordDict,
