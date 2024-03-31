@@ -49,17 +49,15 @@ async function generateDictFromTexts(): Promise<TransformDict> {
   const id2Sentence: SentenceDict = {}
   const ln = textElements.length
   textElements.forEach(({ node, text }, idx) => {
-    const textId = nanoid()
+    const textId = nanoid(12)
     const insertObj = {
       id: textId,
       sentence: text,
     }
     idNodeDict[textId] = node
     if (text.length < 10) {
-      console.log(text)
       id2Sentence[textId] =
         (idx > 0 ? textElements[idx - 1].text : '') + text + (idx < ln - 1 ? textElements[idx + 1].text : '')
-      console.log(id2Sentence[textId])
     } else {
       id2Sentence[textId] = text
     }
@@ -83,9 +81,11 @@ async function generateDictFromTexts(): Promise<TransformDict> {
 }
 
 setTimeout(() => {
+  console.log('start parse content')
   refreshTextElemnts().then(async () => {
     const transformData = await generateDictFromTexts()
     await sendMessage('submitWordDict', transformData)
+    console.log('parse content complete')
   })
 }, 1000)
 

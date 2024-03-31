@@ -7,10 +7,9 @@ import withErrorBoundary from '@src/shared/hoc/withErrorBoundary'
 import { SearchResultItem } from '@src/types'
 import { Button } from '@src/components/ui/button'
 import { Input } from '@src/components/ui/input'
-import { Skeleton } from '@src/components/ui/skeleton'
 import { sendMessage, sendMessageToTab } from '@shared/helper/message'
-import { useEffect } from 'react'
 import { Image } from '@src/components/ui/image'
+import { Typography } from '@src/components/ui/Typography'
 
 async function jumpToTab(result: SearchResultItem) {
   await chrome.windows.update(result.windowId, {
@@ -28,13 +27,15 @@ async function jumpToTab(result: SearchResultItem) {
     })
 }
 
-const ResultItem: React.FC<SearchResultItem> = res => {
+const ResultItem: React.FC<{ res: SearchResultItem; query?: string[] }> = ({ res, query }) => {
   return (
     <div className="flex gap-2 p-2 shadow-sm border rounded-md duration-200 hover:shadow-lg hover:translate-x-1 cursor-pointer">
       <Image src={res.icon} />
       <div className="flex-1">
-        <h3>{res.title}</h3>
-        <p>{res.subTitle}</p>
+        <span className="font-bold">{res.title}</span>
+        <Typography variant="p" highLihgt={query}>
+          {res.subTitle}
+        </Typography>
       </div>
       <Button
         variant={'ghost'}
@@ -49,6 +50,7 @@ const ResultItem: React.FC<SearchResultItem> = res => {
 
 const Popup = () => {
   const [text, setText] = useState('')
+  const [query, setQuery] = useState<string[]>([])
   const [result, setResult] = useState<SearchResultItem[]>([
     {
       nodeId: '1',
@@ -80,6 +82,7 @@ const Popup = () => {
         <Button
           onClick={() => {
             const words = splitText(text)
+            setQuery(words)
             console.log(words)
             sendMessage('searchFromWords', words, data => {
               setResult(data)
@@ -91,7 +94,7 @@ const Popup = () => {
       </div>
       <div className="flex flex-col gap-2 pt-2 pb-2">
         {result?.map(v => {
-          return <ResultItem key={v.nodeId} {...v} />
+          return <ResultItem key={v.nodeId} res={v} query={query} />
         })}
       </div>
     </div>

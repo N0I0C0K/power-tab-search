@@ -8,6 +8,7 @@ const rootDir = resolve(__dirname)
 const srcDir = resolve(rootDir, 'src')
 const pagesDir = resolve(srcDir, 'pages')
 const sharedDir = resolve(srcDir, 'shared')
+const componentsDir = resolve(srcDir, 'components')
 
 const isDev = process.env.__DEV__ === 'true'
 const isProduction = !isDev
@@ -20,6 +21,7 @@ export default defineConfig({
       '@assets': resolve(srcDir, 'assets'),
       '@pages': pagesDir,
       '@shared': sharedDir,
+      '@components': componentsDir,
     },
   },
   plugins: [...getPlugins(isDev), react()],

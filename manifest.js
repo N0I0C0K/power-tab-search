@@ -15,7 +15,7 @@ const manifest = {
   name: 'power-tab-search',
   version: packageJson.version,
   description: 'power-tab-search',
-  permissions: ['storage', 'sidePanel'],
+  permissions: ['storage', 'sidePanel', 'commands'],
   side_panel: {
     default_path: 'src/pages/sidepanel/index.html',
   },
@@ -36,7 +36,7 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['http://*/*', 'https://*/*'],
+      matches: ['http://paper.dropbox.com/*', 'https://paper.dropbox.com/*'],
       js: ['src/pages/contentInjected/index.js'],
       // KEY for cache invalidation
       css: ['assets/css/contentStyle<KEY>.chunk.css'],
@@ -49,6 +49,15 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
+  commands: {
+    open_popup: {
+      suggested_key: {
+        default: 'Alt+Shift+Z',
+        mac: 'Command+Shift+Z',
+      },
+      description: 'quickly open search',
+    },
+  },
 }
 
 export default manifest

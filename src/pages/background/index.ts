@@ -107,4 +107,11 @@ chrome.tabs.onRemoved.addListener((tabId, info) => {
   saveTabDicts()
 })
 
+chrome.commands.onCommand.addListener((command, tab) => {
+  console.log(command)
+  if (command === 'open_popup') {
+    chrome.action.openPopup()
+  }
+})
+
 console.log('background loaded')
