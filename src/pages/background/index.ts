@@ -1,7 +1,7 @@
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script'
 import 'webextension-polyfill'
 import { MessageHandler } from '@src/shared/helper/message'
-import type { SearchResultItem, TransformDict, WordDictVal } from '@src/types'
+import type { SearchResultDict, SearchResultItem, TransformDict, WordDictVal } from '@src/types'
 
 reloadOnUpdate('pages/background')
 
@@ -54,8 +54,8 @@ function intersectionList(list: WordDictVal[][]): {
     .slice(0, 5)
 }
 
-function searchFromWords(words: string[]): SearchResultItem[] {
-  const resList: SearchResultItem[] = []
+function searchFromWords(words: string[]): SearchResultDict {
+  const resDict: SearchResultDict = {}
   for (const tabId in tabDicts) {
     const {
       tab: tabInfo,
@@ -67,21 +67,23 @@ function searchFromWords(words: string[]): SearchResultItem[] {
       }
       return []
     }).filter(l => l.length > 0)
-    resList.push(
-      ...intersectionList(hasList).map<SearchResultItem>(val => {
+    resDict[tabId] = {
+      tabInfo: {
+        title: tabInfo.title!,
+        icon: tabInfo.favIconUrl!,
+        windowId: tabInfo.windowId,
+        tabId: parseInt(tabId),
+      },
+      match: intersectionList(hasList).map<SearchResultItem>(val => {
         return {
-          title: tabInfo.title!,
-          icon: tabInfo.favIconUrl!,
           nodeId: val.id,
           score: val.score,
-          tabId: tabInfo.id!,
           subTitle: sentenceDict[val.id],
-          windowId: tabInfo.windowId,
         }
       }),
-    )
+    }
   }
-  return resList
+  return resDict
 }
 
 const messageHandler = new MessageHandler()

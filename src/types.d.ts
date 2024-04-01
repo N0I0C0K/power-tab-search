@@ -12,14 +12,20 @@ export type SuccessResponse = {
   msg?: string
 }
 
-export type SearchResultItem = {
-  tabId: number
-  windowId: number
-  icon?: string
-  title: string
-  subTitle: string
-  nodeId: string
-  score: number
+export type SearchResultItem = { subTitle: string; nodeId: string; score: number }
+
+export type SearchResultValue = {
+  tabInfo: {
+    tabId: number
+    windowId: number
+    icon?: string
+    title: string
+  }
+  match: SearchResultItem[]
+}
+
+export type SearchResultDict = {
+  [tabId: string]: SearchResultValue
 }
 
 export type SentenceDict = {
@@ -33,7 +39,7 @@ export type JumpToTabParams = {
 
 export type Action = {
   submitWordDict: [TransformDict, void]
-  searchFromWords: [string[], SearchResultItem[]]
+  searchFromWords: [string[], SearchResultDict]
   jumpToTab: [JumpToTabParams, SuccessResponse]
 }
 
