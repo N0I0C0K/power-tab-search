@@ -10,6 +10,7 @@ import { Input } from '@src/components/ui/input'
 import { sendMessage, sendMessageToTab } from '@shared/helper/message'
 import { Image } from '@src/components/ui/image'
 import { Typography } from '@src/components/ui/Typography'
+import { splitTextBySegment } from '@src/shared/helper/segment'
 
 async function jumpToTab(result: SearchResultItem) {
   await chrome.windows.update(result.windowId, {
@@ -64,7 +65,7 @@ const Popup = () => {
   const [segment] = useState(new Intl.Segmenter('zh', { granularity: 'word' }))
   const splitText = useMemo(() => {
     return (text: string): string[] => {
-      return Array.from(segment.segment(text.toLocaleLowerCase()), v => v.segment.trim()).filter(x => x.length > 0)
+      return splitTextBySegment(text, segment)
     }
   }, [segment])
   return (

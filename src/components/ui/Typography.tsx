@@ -24,7 +24,7 @@ type SplitResult = {
   isSplit: boolean
 }
 
-function splitText(str: string, words: string[]): SplitResult[] {
+function splitText(str: string, words: string[], combineSplit: boolean = true): SplitResult[] {
   const res: SplitResult[] = []
   if (words.length === 0) {
     return [{ text: str, isSplit: false }]
@@ -32,21 +32,33 @@ function splitText(str: string, words: string[]): SplitResult[] {
   const reg = new RegExp(words.join('|'), 'g')
   let match: RegExpExecArray
   let lastIdx = 0
+
+  const push = (item: SplitResult) => {
+    if (item.text.trim().length === 0) {
+      return
+    }
+    if (combineSplit && res.length > 0 && item.isSplit === res[res.length - 1].isSplit) {
+      res[res.length - 1].text += item.text
+    } else {
+      res.push(item)
+    }
+  }
+
   while ((match = reg.exec(str)) !== null) {
     if (match.index > 0) {
-      res.push({
+      push({
         text: str.substring(lastIdx, match.index),
         isSplit: false,
       })
     }
-    res.push({
+    push({
       text: match[0],
       isSplit: true,
     })
     lastIdx = match.index + match[0].length
   }
   if (lastIdx != str.length) {
-    res.push({
+    push({
       text: str.substring(lastIdx),
       isSplit: false,
     })

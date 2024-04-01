@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid'
 import { SentenceDict, TransformDict, WordDict } from '@src/types'
 import { MessageHandler, sendMessage } from '@src/shared/helper/message'
 import refreshOnUpdate from 'virtual:reload-on-update-in-view'
+import { splitTextBySegment } from '@src/shared/helper/segment'
 refreshOnUpdate('pages/content/injected/parseContent')
 
 type TextElement = {
@@ -62,16 +63,12 @@ async function generateDictFromTexts(): Promise<TransformDict> {
       id2Sentence[textId] = text
     }
 
-    for (const seg of segmenter.segment(text)) {
-      const segText = seg.segment.trim()
-      if (segText.length === 0) {
-        continue
-      }
+    splitTextBySegment(text, segmenter).forEach(segText => {
       if (!(segText in wordDict)) {
         wordDict[segText] = []
       }
       wordDict[segText].push(insertObj)
-    }
+    })
   })
 
   return {
