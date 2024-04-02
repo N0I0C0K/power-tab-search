@@ -38,12 +38,15 @@ const ResultItem: React.FC<{ res: SearchResultValue; query?: string[] }> = ({ re
       <div className="flex flex-col gap-1">
         {res.match.map(val => {
           return (
-            <div key={val.nodeId} className="flex flex-row items-center rounded-sm p-1">
+            <div
+              key={val.nodeId}
+              className="group flex flex-row items-center rounded-sm p-1 h-8 cursor-pointer hover:shadow-md hover:translate-x-1  duration-200">
               <Typography variant="p" highLihgt={query} className="flex-1">
                 {val.subTitle}
               </Typography>
               <Button
-                variant={'ghost'}
+                variant={'link'}
+                className="hidden group-hover:block"
                 onClick={() => {
                   jumpToTab(val, res.tabInfo.windowId, res.tabInfo.tabId)
                 }}>

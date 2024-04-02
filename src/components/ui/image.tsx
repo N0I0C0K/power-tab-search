@@ -17,7 +17,7 @@ export const Image = React.forwardRef<HTMLImageElement, ImageProps>(props => {
       }
     }, 2000)
   }, [])
-  const className = twMerge('h-8 w-8', props.className)
+  const className = twMerge('h-6 w-6', props.className)
   return (
     <div>
       {loaded !== 'failed' ? (

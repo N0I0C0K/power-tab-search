@@ -38,9 +38,9 @@ function getAllTextRecursion(node: Node | undefined) {
   }
 }
 
-async function refreshTextElemnts() {
+async function refreshTextElemnts(element: Element) {
   textElements = []
-  await getAllTextRecursion(document.getElementsByTagName('body')[0])
+  await getAllTextRecursion(element)
 }
 
 async function generateDictFromTexts(): Promise<TransformDict> {
@@ -77,14 +77,19 @@ async function generateDictFromTexts(): Promise<TransformDict> {
   }
 }
 
-setTimeout(() => {
-  console.log('start parse content')
-  refreshTextElemnts().then(async () => {
+const target = document.getElementsByTagName('body')[0]
+target.onload = () => {
+  refreshTextElemnts(target).then(async () => {
     const transformData = await generateDictFromTexts()
+    for (const key of Object.keys(transformData.wordDict)) {
+      if (key.length === 1 && transformData.wordDict[key].length > 10) {
+        delete transformData.wordDict[key]
+      }
+    }
     await sendMessage('submitWordDict', transformData)
     console.log('parse content complete')
   })
-}, 1000)
+}
 
 const messageHandler = new MessageHandler()
 messageHandler.addHandler('jumpToTab', async (data, sender, sendResp) => {
