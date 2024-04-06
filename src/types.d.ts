@@ -22,6 +22,7 @@ export type SearchResultValue = {
     title: string
   }
   match: SearchResultItem[]
+  score: number
 }
 
 export type SearchResultDict = {
@@ -39,7 +40,7 @@ export type JumpToTabParams = {
 
 export type Action = {
   submitWordDict: [TransformDict, void]
-  searchFromWords: [string[], SearchResultDict]
+  searchFromWords: [string[], { result: SearchResultValue[] }]
   jumpToTab: [JumpToTabParams, SuccessResponse]
 }
 

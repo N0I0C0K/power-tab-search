@@ -1,7 +1,7 @@
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script'
 import 'webextension-polyfill'
 import { MessageHandler } from '@src/shared/helper/message'
-import type { SearchResultDict, SearchResultItem, TransformDict, WordDictVal } from '@src/types'
+import type { SearchResultItem, SearchResultValue, TransformDict, WordDictVal } from '@src/types'
 
 reloadOnUpdate('pages/background')
 
@@ -54,8 +54,8 @@ function intersectionList(list: WordDictVal[][]): {
     .slice(0, 5)
 }
 
-function searchFromWords(words: string[]): SearchResultDict {
-  const resDict: SearchResultDict = {}
+function searchFromWords(words: string[]): SearchResultValue[] {
+  const resList: SearchResultValue[] = []
   for (const tabId in tabDicts) {
     const {
       tab: tabInfo,
@@ -67,23 +67,28 @@ function searchFromWords(words: string[]): SearchResultDict {
       }
       return []
     }).filter(l => l.length > 0)
-    resDict[tabId] = {
+    const matches = intersectionList(hasList).map<SearchResultItem>(val => {
+      return {
+        nodeId: val.id,
+        score: val.score,
+        subTitle: sentenceDict[val.id],
+      }
+    })
+    resList.push({
       tabInfo: {
         title: tabInfo.title!,
         icon: tabInfo.favIconUrl!,
         windowId: tabInfo.windowId,
         tabId: parseInt(tabId),
       },
-      match: intersectionList(hasList).map<SearchResultItem>(val => {
-        return {
-          nodeId: val.id,
-          score: val.score,
-          subTitle: sentenceDict[val.id],
-        }
-      }),
-    }
+      match: matches,
+      score: matches.reduce<number>((p, c) => {
+        return Math.max(p, c.score)
+      }, 0),
+    })
   }
-  return resDict
+  resList.sort((a, b) => b.score - a.score)
+  return resList
 }
 
 const messageHandler = new MessageHandler()
@@ -99,7 +104,9 @@ messageHandler.addHandler('submitWordDict', async (data, sender, sendResp) => {
 
 messageHandler.addHandler('searchFromWords', async (data, sender, sendResp) => {
   const res = searchFromWords(data)
-  sendResp(res)
+  sendResp({
+    result: res,
+  })
 })
 
 chrome.tabs.onRemoved.addListener((tabId, info) => {

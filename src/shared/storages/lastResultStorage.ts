@@ -1,10 +1,10 @@
 import { BaseStorage, createStorage, StorageType } from '@shared/storages/base'
-import type { SearchResultDict } from '@src/types'
+import type { SearchResultValue } from '@src/types'
 
 type SearchResult = {
   query: string[]
   time: string
-  result: SearchResultDict
+  result: SearchResultValue[]
 }
 
 const lastSearchResultStorage = createStorage<SearchResult>(
@@ -12,7 +12,7 @@ const lastSearchResultStorage = createStorage<SearchResult>(
   {
     query: [],
     time: '',
-    result: {},
+    result: [],
   },
   {
     storageType: StorageType.Local,

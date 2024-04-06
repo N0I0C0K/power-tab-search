@@ -4,77 +4,19 @@ import React, { useState, useMemo } from 'react'
 
 import withSuspense from '@src/shared/hoc/withSuspense'
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary'
-import { SearchResultDict, SearchResultItem, SearchResultValue } from '@src/types'
 import { Button } from '@src/components/ui/button'
 import { Input } from '@src/components/ui/input'
-import { sendMessage, sendMessageToTab } from '@shared/helper/message'
-import { Image } from '@src/components/ui/image'
-import { Typography } from '@src/components/ui/Typography'
+import { sendMessage } from '@shared/helper/message'
+
 import { splitTextBySegment } from '@src/shared/helper/segment'
 
 import lastSearchResultStorage from '@src/shared/storages/lastResultStorage'
 import useStorage from '@src/shared/hooks/useStorage'
-
-async function jumpToTab(result: SearchResultItem, windowId: number, tabId: number) {
-  await chrome.windows.update(windowId, {
-    focused: true,
-  })
-  await chrome.tabs
-    .update(tabId, {
-      active: true,
-    })
-    .then(val => {
-      sendMessageToTab(val.id!, 'jumpToTab', {
-        tabId: val.id!,
-        nodeId: result.nodeId,
-      })
-    })
-}
-
-const ResultItem: React.FC<{ res: SearchResultValue; query?: string[] }> = ({ res, query }) => {
-  return (
-    <div className="flex flex-col p-2 gap-2 border rounded-md">
-      <div className="flex gap-2 items-center">
-        <Image src={res.tabInfo.icon ?? ''} />
-        <Typography variant="h4">{res.tabInfo.title}</Typography>
-      </div>
-      <div className="flex flex-col gap-1">
-        {res.match.map(val => {
-          return (
-            <div
-              key={val.nodeId}
-              className="group flex flex-row items-center rounded-sm p-1 pl-8 cursor-pointer hover:shadow-md hover:translate-x-1  duration-200">
-              <Typography variant="p" highLihgt={query} className="flex-1">
-                {val.subTitle}
-              </Typography>
-              <Button
-                variant={'link'}
-                onClick={() => {
-                  jumpToTab(val, res.tabInfo.windowId, res.tabInfo.tabId)
-                }}>
-                Jump
-              </Button>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+import { ResultItem } from './ResultItem'
+import { ResultDisplay } from './ResultDisplay'
 
 const Popup = () => {
   const [text, setText] = useState('')
-
-  // const [result, setResult] = useState<SearchResultDict>({
-  //   '12121': {
-  //     tabInfo: {
-  //       tabId: 1,
-  //       title: 'Test Title',
-  //       windowId: 11,
-  //     },
-  //     match: [{ nodeId: '111', score: 1, subTitle: 'test!test2' }],
-  //   },
-  // })
   const result = useStorage(lastSearchResultStorage)
   const [query, setQuery] = useState<string[]>(result.query)
   const [segment] = useState(new Intl.Segmenter('zh', { granularity: 'word' }))
@@ -103,7 +45,7 @@ const Popup = () => {
             sendMessage('searchFromWords', words, data => {
               lastSearchResultStorage.set({
                 query: words,
-                result: data,
+                result: data.result,
                 time: Date(),
               })
               console.log(data)
@@ -112,13 +54,9 @@ const Popup = () => {
           Search
         </Button>
       </div>
-      <div className="flex flex-col gap-2 pt-2 pb-2">
-        {result
-          ? Object.keys(result.result).map(tabId => {
-              return <ResultItem key={tabId} res={result.result[tabId]} query={query} />
-            })
-          : null}
-      </div>
+      {result && result.result && result.result.length > 0 ? (
+        <ResultDisplay query={query} resultList={result.result} />
+      ) : null}
     </div>
   )
 }
