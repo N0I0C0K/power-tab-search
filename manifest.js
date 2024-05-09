@@ -36,7 +36,7 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['http://paper.dropbox.com/*', 'https://paper.dropbox.com/*'],
+      matches: ['http://*/*', 'https://*/*'],
       js: ['src/pages/contentInjected/index.js'],
       // KEY for cache invalidation
       css: ['assets/css/contentStyle<KEY>.chunk.css'],
